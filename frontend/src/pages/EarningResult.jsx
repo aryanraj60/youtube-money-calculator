@@ -30,94 +30,94 @@ const EarningResult = () => {
 
   const videoDetails = userVideoData?.items?.[0];
 
-  // useEffect(() => {
-  //   const calculateEarnings = async (channelId, views, comments, likes) => {
-  //     if (channelId && views && comments && likes) {
-  //       try {
-  //         setEarningLoading(true);
-  //         const response =
-  //           await axios.get(`/api/getChannelById?channelId=${channelId}
-  //                   `);
+  useEffect(() => {
+    const calculateEarnings = async (channelId, views, comments, likes) => {
+      if (channelId && views && comments && likes) {
+        try {
+          setEarningLoading(true);
+          const response =
+            await axios.get(`/api/getChannelById?channelId=${channelId}
+                    `);
 
-  //         if (response.data.data) {
-  //           const { statistics } = response.data.data.items[0];
-  //           if (statistics.hiddenSubscriberCount) {
-  //             alert(
-  //               "Subscriber count is hidden by the owner, Can't calculate earnings..."
-  //             );
-  //           } else {
-  //             const subscriberCount = statistics.subscriberCount;
-  //             const earnings =
-  //               Math.min(subscriberCount, views) + 10 * comments + 5 * likes;
+          if (response.data.data) {
+            const { statistics } = response.data.data.items[0];
+            if (statistics.hiddenSubscriberCount) {
+              alert(
+                "Subscriber count is hidden by the owner, Can't calculate earnings..."
+              );
+            } else {
+              const subscriberCount = statistics.subscriberCount;
+              const earnings =
+                Math.min(subscriberCount, views) + 10 * comments + 5 * likes;
 
-  //             setEstimatedEarning(earnings);
-  //           }
-  //         }
-  //       } catch (e) {
-  //         console.log("Channel_AXIOS_ERROR", e);
-  //       } finally {
-  //         setEarningLoading(false);
-  //       }
-  //     }
-  //   };
+              setEstimatedEarning(earnings);
+            }
+          }
+        } catch (e) {
+          console.log("Channel_AXIOS_ERROR", e);
+        } finally {
+          setEarningLoading(false);
+        }
+      }
+    };
 
-  //   const getOtherTopVideos = async (categoryId) => {
-  //     if (categoryId) {
-  //       try {
-  //         setSimiliarVideoLoading(true);
-  //         const response = await axios.get(
-  //           `/api/getVideosByCategoryId?categoryId=${categoryId}`
-  //         );
+    const getOtherTopVideos = async (categoryId) => {
+      if (categoryId) {
+        try {
+          setSimiliarVideoLoading(true);
+          const response = await axios.get(
+            `/api/getVideosByCategoryId?categoryId=${categoryId}`
+          );
 
-  //         if (response.data.data.items.length > 0) {
-  //           const videoIds = response.data.data.items.map(
-  //             (item) => item.id.videoId
-  //           );
+          if (response.data.data.items.length > 0) {
+            const videoIds = response.data.data.items.map(
+              (item) => item.id.videoId
+            );
 
-  //           const channelIds = response.data.data.items.map(
-  //             (item) => item.snippet.channelId
-  //           );
+            const channelIds = response.data.data.items.map(
+              (item) => item.snippet.channelId
+            );
 
-  //           // Fetch video statistics for each video
-  //           const similiarVideosResponse = await axios.get(
-  //             `/api/getVideoById?videoId=${videoIds.join(",")}`
-  //           );
+            // Fetch video statistics for each video
+            const similiarVideosResponse = await axios.get(
+              `/api/getVideoById?videoId=${videoIds.join(",")}`
+            );
 
-  //           if (similiarVideosResponse.data.data.items.length > 0) {
-  //             setSimiliarVideos(similiarVideosResponse.data.data.items);
-  //           }
+            if (similiarVideosResponse.data.data.items.length > 0) {
+              setSimiliarVideos(similiarVideosResponse.data.data.items);
+            }
 
-  //           // Fetch channel statistics for each channel
-  //           const similiarChannels = await Promise.all(
-  //             channelIds.map(async (channelId) => {
-  //               const channelResponse = await axios.get(
-  //                 `/api/getChannelById?channelId=${channelId}`
-  //               );
-  //               return channelResponse.data.data.items[0];
-  //             })
-  //           );
+            // Fetch channel statistics for each channel
+            const similiarChannels = await Promise.all(
+              channelIds.map(async (channelId) => {
+                const channelResponse = await axios.get(
+                  `/api/getChannelById?channelId=${channelId}`
+                );
+                return channelResponse.data.data.items[0];
+              })
+            );
 
-  //           if (similiarChannels.length > 0) {
-  //             setSimilarChannels(similiarChannels);
-  //           }
-  //         }
-  //       } catch (e) {
-  //         console.log("Similiar_Video_Axios_ERROR", e);
-  //       } finally {
-  //         setSimiliarVideoLoading(false);
-  //       }
-  //     }
-  //   };
-  //   if (videoDetails) {
-  //     calculateEarnings(
-  //       snippet.channelId,
-  //       statistics.viewCount,
-  //       statistics.commentCount,
-  //       statistics.likeCount
-  //     );
-  //     getOtherTopVideos(snippet.categoryId);
-  //   }
-  // }, []);
+            if (similiarChannels.length > 0) {
+              setSimilarChannels(similiarChannels);
+            }
+          }
+        } catch (e) {
+          console.log("Similiar_Video_Axios_ERROR", e);
+        } finally {
+          setSimiliarVideoLoading(false);
+        }
+      }
+    };
+    if (videoDetails) {
+      calculateEarnings(
+        snippet.channelId,
+        statistics.viewCount,
+        statistics.commentCount,
+        statistics.likeCount
+      );
+      getOtherTopVideos(snippet.categoryId);
+    }
+  }, []);
 
   if (videoDetails) {
     snippet = videoDetails.snippet;
@@ -135,17 +135,19 @@ const EarningResult = () => {
       <div className="mt-10 bg-[#1E1E1E] rounded-lg py-5 pr-24 px-10 min-h-[266px]">
         <div className="grid grid-cols-[1.5fr_1fr] gap-4">
           <div className="grid grid-cols-2 gap-8">
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
               <div className="bg-[#707070] py-[4px] flex items-center gap-2 px-[8px] w-44 rounded-md text-[#FFFFFF]">
                 <img src={mdiPrize} alt="mdiPrize" />
                 <p>Top earner video</p>
               </div>
 
-              <img
-                src={snippet?.thumbnails?.default?.url}
-                alt="ytbVideoThumbnail"
-                className=""
-              />
+              <div className="w-[240px] h-[135px]">
+                <img
+                  src={snippet?.thumbnails?.standard?.url}
+                  alt="ytbVideoThumbnail"
+                  className="rounded-lg w-full h-full object-cover"
+                />
+              </div>
 
               <p className="text-[#FFFFFF80] font-light">
                 Uploaded on - {formatDate(snippet?.publishedAt)}

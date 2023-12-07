@@ -42,7 +42,7 @@ const Layout = ({ children }) => {
         onRequestClose={closeModal}
         style={customStyles}
       >
-        {/* {isCallBackSuccess ? (
+        {isCallBackSuccess ? (
           <AfterCallBack
             closeModal={closeModal}
             setIsCallBackSuccess={setIsCallBackSuccess}
@@ -52,11 +52,7 @@ const Layout = ({ children }) => {
             setIsCallBackSuccess={setIsCallBackSuccess}
             closeModal={closeModal}
           />
-        )} */}
-        <AfterCallBack
-          closeModal={closeModal}
-          setIsCallBackSuccess={setIsCallBackSuccess}
-        />
+        )}
       </Modal>
 
       <div>{children}</div>

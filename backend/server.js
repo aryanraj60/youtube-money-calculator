@@ -17,13 +17,13 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const sendCallbackEmail = async (name, contactNumber) => {
   const msg = {
-    to: "aryanraj234.arr@gmail.com",
+    to: "ravi@anchors.in",
     from: "aryanraj234.ar@gmail.com", // Replace with your verified sender email
     subject: "Callback Request",
-    text: `Callback Request received\n\nName: ${name}\nContact Number: ${contactNumber}`,
+    text: `Hey Ravi, You have Received a Callback Request -\n\nName: ${name}\nContact Number: ${contactNumber}`,
   };
 
-  await sgMail.send(msg);
+  return await sgMail.send(msg);
 };
 
 app.get("/", (req, res) => {
@@ -36,7 +36,7 @@ app.post("/api/callback", async (req, res) => {
   if (name && mobile) {
     // Send email notification
     try {
-      await sendCallbackEmail(name, mobile);
+      const callbackResponse = await sendCallbackEmail(name, mobile);
 
       res.status(200).json({
         message: "Callback request received successfully",
@@ -44,7 +44,7 @@ app.post("/api/callback", async (req, res) => {
       });
     } catch (e) {
       console.log("Axios Error", e.response.body);
-      res.status(400).send("Something went wrong");
+      res.status(400).send("Something went wrong while requesting callback...");
     }
   } else {
     res.status(400).send("Invalid email address or number");

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import ytbVector from "../assets/ytb-vector.svg";
 import axios from "axios";
-import ProgressBar from "./ProgressBar";
 import { useNavigate } from "react-router-dom";
+import { Progress } from "@material-tailwind/react";
 
 const LandingForm = () => {
   const [videoUrl, setVideoUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [progressPercent, setProgressPercent] = useState(10);
+  const [progressPercent, setProgressPercent] = useState(0);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -19,6 +19,8 @@ const LandingForm = () => {
 
         if (videoId) {
           setIsLoading(true);
+
+          await new Promise((resolve, reject) => setTimeout(resolve, 1000));
           const response = await axios.get(
             `/api/getVideoById?videoId=${videoId}`
           );
@@ -46,6 +48,20 @@ const LandingForm = () => {
     }
   };
 
+  useEffect(() => {
+    if (isLoading) {
+      const progressInterval = setInterval(() => {
+        setProgressPercent((prev) => {
+          if (prev < 100) {
+            return prev + 10;
+          } else {
+            clearInterval(progressInterval);
+            return 100;
+          }
+        });
+      }, 100);
+    }
+  }, [isLoading]);
   return (
     <div className="mt-16">
       <form onSubmit={handleSubmit} className="flex items-center gap-6">
@@ -70,7 +86,12 @@ const LandingForm = () => {
 
       {isLoading && (
         <div className="mt-5">
-          <ProgressBar progressPercent={`80%`} />
+          <Progress
+            value={progressPercent}
+            label="Completed"
+            color="red"
+            className="bg-gray-300"
+          />
         </div>
       )}
     </div>
