@@ -17,13 +17,25 @@ function formatDate(inputDate) {
   return formattedDate;
 }
 
+const calculateEarnings = (subscriberCount, views, comments, likes) => {
+  if (subscriberCount && views && comments && likes) {
+    const earnings =
+      Math.min(subscriberCount, views) + 10 * comments + 5 * likes;
+
+    return earnings;
+  } else {
+    return "No Result";
+  }
+};
+
 const EarningResult = () => {
   const [userVideoData, setUserVideoData] = useState(
     JSON.parse(localStorage.getItem("userVideoData")) || {}
   );
+  const [userSubscriber, setUserSubscriber] = useState("");
+  const [userVideoRank, setUserVideoRank] = useState("");
   const [estimatedEarning, setEstimatedEarning] = useState("");
   const [similarVideos, setSimiliarVideos] = useState([]);
-  const [similarChannels, setSimilarChannels] = useState([]);
   const [isSimiliarVideoLoading, setSimiliarVideoLoading] = useState(false);
   const [isEarningLoading, setEarningLoading] = useState(false);
   let snippet, statistics;
@@ -51,6 +63,7 @@ const EarningResult = () => {
                 Math.min(subscriberCount, views) + 10 * comments + 5 * likes;
 
               setEstimatedEarning(earnings);
+              setUserSubscriber(subscriberCount);
             }
           }
         } catch (e) {
@@ -61,45 +74,35 @@ const EarningResult = () => {
       }
     };
 
-    const getOtherTopVideos = async (categoryId) => {
-      if (categoryId) {
+    if (videoDetails) {
+      calculateEarnings(
+        snippet.channelId,
+        statistics.viewCount,
+        statistics.commentCount,
+        statistics.likeCount
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    const getOtherTopVideos = async (channelId) => {
+      if (channelId) {
         try {
           setSimiliarVideoLoading(true);
           const response = await axios.get(
-            `/api/getVideosByCategoryId?categoryId=${categoryId}`
+            `/api/getVideosByChannelId?channelId=${channelId}`
           );
 
           if (response.data.data.items.length > 0) {
-            const videoIds = response.data.data.items.map(
-              (item) => item.id.videoId
+            const channelVideos = response.data.data.items;
+
+            const { sortedVideos, userVideoRank } = getRankAndSortedVideos(
+              videoDetails,
+              channelVideos
             );
 
-            const channelIds = response.data.data.items.map(
-              (item) => item.snippet.channelId
-            );
-
-            // Fetch video statistics for each video
-            const similiarVideosResponse = await axios.get(
-              `/api/getVideoById?videoId=${videoIds.join(",")}`
-            );
-
-            if (similiarVideosResponse.data.data.items.length > 0) {
-              setSimiliarVideos(similiarVideosResponse.data.data.items);
-            }
-
-            // Fetch channel statistics for each channel
-            const similiarChannels = await Promise.all(
-              channelIds.map(async (channelId) => {
-                const channelResponse = await axios.get(
-                  `/api/getChannelById?channelId=${channelId}`
-                );
-                return channelResponse.data.data.items[0];
-              })
-            );
-
-            if (similiarChannels.length > 0) {
-              setSimilarChannels(similiarChannels);
-            }
+            setSimiliarVideos(sortedVideos);
+            setUserVideoRank(userVideoRank);
           }
         } catch (e) {
           console.log("Similiar_Video_Axios_ERROR", e);
@@ -108,16 +111,49 @@ const EarningResult = () => {
         }
       }
     };
-    if (videoDetails) {
-      calculateEarnings(
-        snippet.channelId,
-        statistics.viewCount,
-        statistics.commentCount,
-        statistics.likeCount
-      );
-      getOtherTopVideos(snippet.categoryId);
+
+    if (videoDetails && userSubscriber) {
+      getOtherTopVideos(snippet.channelId);
     }
-  }, []);
+  }, [userSubscriber]);
+
+  const getRankAndSortedVideos = (userVideo, otherVideos) => {
+    let sortedVideos;
+    // sorting function to short user videos based on estimated earning
+    const sortingCriteria = (video) =>
+      calculateEarnings(
+        userSubscriber,
+        video.statistics.viewCount,
+        video.statistics.commentCount,
+        video.statistics.likeCount
+      );
+
+    // Sort the videos in descending order based on the sorting criteria
+    const foundUserVideo = otherVideos.some(
+      (video) => video.id === userVideo.id
+    );
+
+    if (foundUserVideo) {
+      sortedVideos = [...otherVideos].sort(
+        (a, b) => sortingCriteria(b) - sortingCriteria(a)
+      );
+    } else {
+      sortedVideos = [...otherVideos, userVideo].sort(
+        (a, b) => sortingCriteria(b) - sortingCriteria(a)
+      );
+    }
+
+    // Find the index of the user's video in the sorted array
+    const userVideoIndex = sortedVideos.findIndex(
+      (video) => video.id === userVideo.id
+    );
+
+    // The rank is the index + 1 (as array indices are zero-based)
+    return {
+      sortedVideos: sortedVideos,
+      userVideoRank: userVideoIndex,
+    };
+  };
 
   if (videoDetails) {
     snippet = videoDetails.snippet;
@@ -130,6 +166,7 @@ const EarningResult = () => {
     );
   }
 
+  // console.log("Rank of User Video", calculateRank())
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mt-10 bg-[#1E1E1E] rounded-lg py-5 pr-24 px-10 min-h-[266px]">
@@ -201,7 +238,8 @@ const EarningResult = () => {
           ) : (
             <OtherVideosTable
               similarVideos={similarVideos}
-              similarChannels={similarChannels}
+              userSubscriber={userSubscriber}
+              userVideoRank={userVideoRank}
             />
           )}
         </div>

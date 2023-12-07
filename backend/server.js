@@ -105,6 +105,70 @@ app.get("/api/getChannelById", async (req, res) => {
   }
 });
 
+app.get("/api/getVideosByChannelId", async (req, res) => {
+  const channelId = req.query.channelId;
+
+  if (channelId) {
+    try {
+      const playlistResponse = await axios.get(
+        `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${process.env.YTB_API_KEY}`
+      );
+
+      if (
+        playlistResponse.data.items[0].contentDetails.relatedPlaylists.uploads
+      ) {
+        const uploadPlaylist =
+          playlistResponse.data.items[0].contentDetails.relatedPlaylists
+            .uploads;
+        const channelVideoResponse = await axios.get(
+          `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadPlaylist}&key=${process.env.YTB_API_KEY}`
+        );
+
+        if (channelVideoResponse.data.items.length > 0) {
+          const channelVideos = channelVideoResponse.data.items;
+
+          console.log("channelVideoResponse", channelVideos);
+          const videoIds = channelVideos.map(
+            (video) => video.snippet.resourceId.videoId
+          );
+
+          console.log("Video Id", videoIds);
+
+          const videosWithStatsResponse = await axios.get(
+            `https://www.googleapis.com/youtube/v3/videos?id=${videoIds.join(
+              ","
+            )}&part=snippet,statistics&key=${process.env.YTB_API_KEY}`
+          );
+
+          console.log("Video", videosWithStatsResponse);
+
+          if (videosWithStatsResponse.data.items.length > 0) {
+            res.status(200).json({
+              data: videosWithStatsResponse.data,
+              success: true,
+            });
+          } else {
+            res
+              .status(400)
+              .send("Failed to retrieve channel videos with statistics...");
+          }
+        } else {
+          res
+            .status(400)
+            .send("Failed to retrieve channel upload playlist videos.");
+        }
+      } else {
+        res.status(400).send("Failed to retrieve upload playlist details.");
+      }
+    } catch (e) {
+      console.log("Channel_AXIOS_ERROR", e);
+      res.status(400).send("Failed to retrieve channel Details");
+    }
+  } else {
+    res.status(400).send("Invalid channel Id");
+  }
+});
+
 app.get("/api/getVideosByCategoryId", async (req, res) => {
   const categoryId = req.query.categoryId;
 

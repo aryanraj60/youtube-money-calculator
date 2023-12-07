@@ -1,8 +1,11 @@
 import React from "react";
 
 const Head = "text-sm text-center px-6 py-2";
-const Text =
-  "text-sm text-center leading-6 text-[#FFFFFFCC] whitespace-nowrap px-5 py-3";
+const defaultText =
+  "text-sm text-center text-[#FFFFFFCC] leading-6 whitespace-nowrap px-5 py-3";
+
+const userVideoRankText =
+  "text-sm text-center text-red-600 leading-6 whitespace-nowrap px-5 py-3";
 
 function formatDate(inputDate) {
   const options = { year: "numeric", month: "long", day: "numeric" };
@@ -24,27 +27,27 @@ const calculateEarnings = (subscriberCount, views, comments, likes) => {
   }
 };
 
-const OtherVideosTable = ({ similarVideos, similarChannels }) => {
-  const getVideoEarnings = (channelId, views, comments, likes) => {
-    if (channelId) {
-      const foundChannel = similarChannels.find(
-        (channel) => channel.id === channelId
-      );
+const OtherVideosTable = ({ similarVideos, userSubscriber, userVideoRank }) => {
+  // const getVideoEarnings = (channelId, views, comments, likes) => {
+  //   if (channelId) {
+  //     const foundChannel = similarChannels.find(
+  //       (channel) => channel.id === channelId
+  //     );
 
-      if (foundChannel?.statistics?.hiddenSubscriberCount) {
-        return "hiddenSubscriberCount";
-      } else {
-        return calculateEarnings(
-          foundChannel?.statistics?.subscriberCount,
-          views,
-          comments,
-          likes
-        );
-      }
-    }
-  };
+  //     if (foundChannel?.statistics?.hiddenSubscriberCount) {
+  //       return "hiddenSubscriberCount";
+  //     } else {
+  //       return calculateEarnings(
+  //         foundChannel?.statistics?.subscriberCount,
+  //         views,
+  //         comments,
+  //         likes
+  //       );
+  //     }
+  //   }
+  // };
   return (
-    <div className="overflow-x-scroll overflow-hidden relative w-full">
+    <div className="overflow-x-scroll overflow-hidden video-table-scrollbar relative w-full">
       <table className="w-full tabel-auto">
         <thead className="text-[#FFFFFF] bg-[#1E1E1E] h-20">
           <tr className="">
@@ -74,42 +77,83 @@ const OtherVideosTable = ({ similarVideos, similarChannels }) => {
             </th>
           </tr>
         </thead>
-        <tbody className="bg-main divide-y divide-gray-800">
-          {similarVideos?.length > 0 &&
-            similarVideos.map((video, i) => (
+
+        {similarVideos?.length > 0 ? (
+          <tbody className="bg-main divide-y divide-gray-800">
+            {similarVideos.map((video, i) => (
               <tr key={i}>
-                {/* <td className={`${Text}`}>
-            <div className="w-12 p-1 bg-dry border border-border h-12 rounded overflow-hidden">
-              <img
-                src={movie?.titleImg}
-                alt={movie?.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </td> */}
-                <td className={`${Text}`}>{i + 1}</td>
-                <td className={`${Text} max-w-md truncate`}>
+                <td
+                  // className={`${Text} ${
+                  //   i === userVideoRank
+                  //     ? "text-sm text-center text-red-500 leading-6 whitespace-nowrap px-5 py-3"
+                  //     : "text-sm text-center text-[#FFFFFFCC] leading-6 whitespace-nowrap px-5 py-3"
+                  // }`}
+                  className={`${
+                    i === userVideoRank ? userVideoRankText : defaultText
+                  }`}
+                >
+                  {i + 1}
+                </td>
+                <td
+                  className={`${
+                    i === userVideoRank ? userVideoRankText : defaultText
+                  } max-w-md truncate`}
+                >
                   {video?.snippet?.title}
                 </td>
-                <td className={`${Text} flex justify-center`}>
-                  <div className="w-12 p-1 bg-dry border border-border h-12 rounded overflow-hidden">
+                <td
+                  className={`${
+                    i === userVideoRank ? userVideoRankText : defaultText
+                  } flex justify-center`}
+                >
+                  <div
+                    className={`w-[120px] p-1 bg-dry border ${
+                      i === userVideoRank ? "border-red-500" : "border-gray-500"
+                    } h-[67px] rounded overflow-hidden`}
+                  >
                     <img
-                      src={video?.snippet?.thumbnails?.default?.url}
+                      src={video?.snippet?.thumbnails?.medium?.url}
                       alt={video?.snippet?.title}
                       className="w-full h-full object-cover"
                     />
                   </div>
                 </td>
-                <td className={`${Text}`}>{video?.statistics?.viewCount}</td>
-                <td className={`${Text}`}>{video?.statistics?.likeCount}</td>
-                <td className={`${Text}`}>{video?.statistics?.commentCount}</td>
-                <td className={`${Text}`}>
+                <td
+                  className={`${
+                    i === userVideoRank ? userVideoRankText : defaultText
+                  }`}
+                >
+                  {video?.statistics?.viewCount}
+                </td>
+                <td
+                  className={`${
+                    i === userVideoRank ? userVideoRankText : defaultText
+                  }`}
+                >
+                  {video?.statistics?.likeCount}
+                </td>
+                <td
+                  className={`${
+                    i === userVideoRank ? userVideoRankText : defaultText
+                  }`}
+                >
+                  {video?.statistics?.commentCount}
+                </td>
+                <td
+                  className={`${
+                    i === userVideoRank ? userVideoRankText : defaultText
+                  }`}
+                >
                   {formatDate(video?.snippet?.publishedAt)}
                 </td>
-                <td className={`${Text}`}>
+                <td
+                  className={`${
+                    i === userVideoRank ? userVideoRankText : defaultText
+                  }`}
+                >
                   ₹{" "}
-                  {getVideoEarnings(
-                    video?.snippet?.channelId,
+                  {calculateEarnings(
+                    userSubscriber,
                     video?.statistics?.viewCount,
                     video?.statistics?.commentCount,
                     video?.statistics?.likeCount
@@ -117,7 +161,10 @@ const OtherVideosTable = ({ similarVideos, similarChannels }) => {
                 </td>
               </tr>
             ))}
-        </tbody>
+          </tbody>
+        ) : (
+          <p>No other video found for this channel</p>
+        )}
       </table>
     </div>
   );

@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.video-table-scrollbar::-webkit-scrollbar-track {
+  background: rgb(
+    23,
+    23,
+    23
+  ); /* Change the background color of the scrollbar track */
+}
