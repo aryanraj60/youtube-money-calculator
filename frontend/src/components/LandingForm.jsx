@@ -20,7 +20,7 @@ const LandingForm = () => {
         if (videoId) {
           setIsLoading(true);
 
-          await new Promise((resolve, reject) => setTimeout(resolve, 1000));
+          await new Promise((resolve, reject) => setTimeout(resolve, 500));
           const response = await axios.get(
             `/api/getVideoById?videoId=${videoId}`
           );
