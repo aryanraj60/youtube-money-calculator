@@ -9,7 +9,7 @@ const Navbar = ({ openModal }) => {
       <Link to="/" className="flex gap-3 items-center relative">
         <img src={navLogo} alt="navLogo" />
 
-        <h3 className="text-[#FFFFFF] font-semibold text-3xl">anchors</h3>
+        <h3 className="text-[#FFFFFF] font-semibold text-3xl">ProfitPulse</h3>
 
         <p className="bg-[#CCCCCC] py-0.5 px-1.5 rounded-md absolute -top-2 -right-12 text-xs text-[#232426]">
           Beta

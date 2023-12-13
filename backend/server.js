@@ -17,10 +17,10 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const sendCallbackEmail = async (name, contactNumber) => {
   const msg = {
-    to: "ravi@anchors.in",
+    to: "aryanraj234.arr@gmail.com",
     from: "aryanraj234.ar@gmail.com", // Replace with your verified sender email
     subject: "Callback Request",
-    text: `Hey Ravi, You have Received a Callback Request -\n\nName: ${name}\nContact Number: ${contactNumber}`,
+    text: `Hey Aryan, You have Received a Callback Request -\n\nName: ${name}\nContact Number: ${contactNumber}`,
   };
 
   return await sgMail.send(msg);
